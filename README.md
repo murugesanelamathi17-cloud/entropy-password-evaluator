@@ -4,6 +4,9 @@
 **Under the Guidance of:** Dr. K. Senbagam  
 **Presented by:** Hariharan P, Harini R M, Madhesh Kumar D
 
+?? **Live Web Application**: [https://murugesanelamathi17-cloud.github.io/entropy-password-evaluator/](https://murugesanelamathi17-cloud.github.io/entropy-password-evaluator/)  
+?? **GitHub Source Code**: [https://github.com/murugesanelamathi17-cloud/entropy-password-evaluator](https://github.com/murugesanelamathi17-cloud/entropy-password-evaluator)
+
 ---
 
 ## ?? Overview
@@ -51,3 +54,4 @@ The slide reference example `"ababab"` reproduces exact figures:
 - $f_5 \approx 0.4667$
 - **$S(\text{ababab}) = 0.1750$** ($\to$ **VERY WEAK PASSWORD**)
 - **$D(\text{ababab}) = 80.3671$** ($\to$ Large structural deviation confirming high predictability)
+
