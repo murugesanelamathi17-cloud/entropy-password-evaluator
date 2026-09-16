@@ -1,4 +1,4 @@
-﻿export interface RenyiResult {
+export interface RenyiResult {
   n: number;
   uniqueChars: number;
   frequencies: Record<string, number>;
@@ -86,12 +86,26 @@ export interface SubstringResult {
   f5Norm: number;
 }
 
+export interface CorpusGatingResult {
+  rank: number;
+  corpusSize: number;
+  phi6: number; // normalized [0, 1]
+  mechanismA_additive: number; // S_add
+  mechanismB_multiplicative: number; // S_gated
+  mechanismC_hardCap: number; // S_capped
+  isCompromised: boolean;
+  breachTier: string;
+}
+
+export type GatingMechanism = 'baseline' | 'additive' | 'multiplicative' | 'hardCap';
+
 export interface FeatureVector {
   f1_renyi: number;
   f2_keyboard: number;
   f3_markov: number;
   f4_fourier: number;
   f5_substring: number;
+  f6_corpus: number;
 }
 
 export type StrengthClassification = 
@@ -118,6 +132,7 @@ export interface FullEvaluationResult {
   markov: MarkovResult;
   fourier: FourierResult;
   substring: SubstringResult;
+  corpusGating: CorpusGatingResult;
   features: FeatureVector;
   weights: {
     w1: number;
@@ -125,8 +140,11 @@ export interface FullEvaluationResult {
     w3: number;
     w4: number;
     w5: number;
+    w6: number;
   };
-  finalWeightedScore: number; // S(x)
+  s5BaselineScore: number; // Original 5-feature score S_5(x)
+  finalWeightedScore: number; // Effective score according to active mechanism
+  activeMechanism: GatingMechanism;
   classification: StrengthClassification;
   deviation: StructuralDeviationResult;
 }

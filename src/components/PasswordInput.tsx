@@ -1,6 +1,6 @@
-﻿import React, { useState } from 'react';
-import { Eye, EyeOff, Sparkles, RefreshCw, Copy, Check, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { FullEvaluationResult } from '../types';
+import React, { useState } from 'react';
+import { Eye, EyeOff, Sparkles, Copy, Check, ShieldAlert, ShieldCheck, Database } from 'lucide-react';
+import { FullEvaluationResult, GatingMechanism } from '../types';
 import { BENCHMARK_PRESETS } from '../data/benchmarks';
 import { getClassificationColor } from '../core/structuralDeviation';
 
@@ -8,12 +8,16 @@ interface PasswordInputProps {
   password: string;
   setPassword: (val: string) => void;
   result: FullEvaluationResult;
+  mechanism: GatingMechanism;
+  setMechanism: (m: GatingMechanism) => void;
 }
 
 export const PasswordInput: React.FC<PasswordInputProps> = ({
   password,
   setPassword,
   result,
+  mechanism,
+  setMechanism,
 }) => {
   const [showPassword, setShowPassword] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -59,18 +63,67 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
             </span>
           </label>
           <p className="text-xs text-slate-400">
-            Type any password or select a presentation benchmark below
+            Type any password or choose an adversarial benchmark like <span className="font-mono text-cyan-300">&quot;password1&quot;</span>
           </p>
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Mechanism Toggle Selector */}
+          <div className="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 text-[11px] font-mono">
+            <span className="text-slate-500 px-1.5 hidden md:inline">Mode:</span>
+            <button
+              onClick={() => setMechanism('multiplicative')}
+              className={`px-2 py-0.5 rounded transition-all ${
+                mechanism === 'multiplicative'
+                  ? 'bg-cyan-500 text-slate-950 font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title="Section 6.1.3 Multiplicative Gate (Recommended)"
+            >
+              Gate (Mult)
+            </button>
+            <button
+              onClick={() => setMechanism('additive')}
+              className={`px-2 py-0.5 rounded transition-all ${
+                mechanism === 'additive'
+                  ? 'bg-cyan-500 text-slate-950 font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title="Section 6.1.2 Additive Extension (w6 = 0.35)"
+            >
+              Additive
+            </button>
+            <button
+              onClick={() => setMechanism('hardCap')}
+              className={`px-2 py-0.5 rounded transition-all ${
+                mechanism === 'hardCap'
+                  ? 'bg-cyan-500 text-slate-950 font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title="Section 6.1.4 Hard Cap (tau = 0.05)"
+            >
+              Hard Cap
+            </button>
+            <button
+              onClick={() => setMechanism('baseline')}
+              className={`px-2 py-0.5 rounded transition-all ${
+                mechanism === 'baseline'
+                  ? 'bg-cyan-500 text-slate-950 font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title="Section 6 Baseline 5-Feature (No Gating)"
+            >
+              Baseline
+            </button>
+          </div>
+
           <button
             onClick={generateRandomStrong}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition-colors"
             title="Generate high harmonic random password"
           >
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            Random Strong
+            <span className="hidden sm:inline">Random Strong</span>
           </button>
           <button
             onClick={handleCopy}
@@ -89,7 +142,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
           type={showPassword ? 'text' : 'password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter password to evaluate harmonic signal..."
+          placeholder="Enter password to evaluate harmonic signal and breach rank..."
           className="w-full bg-slate-950/80 border-2 border-slate-700 focus:border-cyan-500 rounded-xl px-4 py-3.5 pr-12 font-mono text-base sm:text-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner tracking-wider"
         />
         <button
@@ -119,10 +172,31 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
               )}
               {result.classification}
             </span>
+
+            {/* Breach Rank Tag */}
+            {result.corpusGating.isCompromised && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-mono bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-1">
+                <Database className="w-3 h-3" />
+                Rank #{result.corpusGating.rank.toLocaleString()} in Breach Corpus
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="text-slate-400">Weighted Score S(x):</span>
+            {mechanism !== 'baseline' && (
+              <span className="text-slate-500 line-through text-[11px] mr-1">
+                S5: {result.s5BaselineScore.toFixed(4)}
+              </span>
+            )}
+            <span className="text-slate-400">
+              {mechanism === 'multiplicative'
+                ? 'S_gated(x):'
+                : mechanism === 'additive'
+                ? 'S_add(x):'
+                : mechanism === 'hardCap'
+                ? 'S_capped(x):'
+                : 'S(x):'}
+            </span>
             <span className={`text-base font-bold ${colors.text}`}>
               {result.finalWeightedScore.toFixed(4)}
             </span>
@@ -184,8 +258,9 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
 
       {/* Preset Quick-Buttons */}
       <div>
-        <div className="text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
+        <div className="text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
           <span>Quick Benchmarks:</span>
+          <span className="text-[10px] font-mono text-cyan-400">Click to test Section 6.1 Adversarial Case</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {BENCHMARK_PRESETS.map((preset) => (

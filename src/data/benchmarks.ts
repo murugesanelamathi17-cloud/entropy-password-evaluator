@@ -1,4 +1,4 @@
-﻿export interface BenchmarkPreset {
+export interface BenchmarkPreset {
   name: string;
   password: string;
   category: string;
@@ -13,6 +13,13 @@ export const BENCHMARK_PRESETS: BenchmarkPreset[] = [
     category: 'Presentation Benchmark',
     description: 'Exact reference password analyzed in research presentation slides 8-31.',
     expectedTier: 'Very weak (0.1750)',
+  },
+  {
+    name: 'Sec 6.1 Adversarial ("password1")',
+    password: 'password1',
+    category: 'Section 6.1 Corpus Gating Trap',
+    description: 'Ranks #5 of 14M in breach corpus. 5-feature baseline rates it 0.712 (false positive), but Section 6.1 Multiplicative Gate drops it to 0.070!',
+    expectedTier: 'Very weak (0.0700)',
   },
   {
     name: 'Checkbox Trap ("Password1!")',
@@ -32,14 +39,14 @@ export const BENCHMARK_PRESETS: BenchmarkPreset[] = [
     name: 'Passphrase ("correct-horse-battery-staple")',
     password: 'correct-horse-battery-staple',
     category: 'Passphrase',
-    description: 'Long passphrase with high collision entropy and distributed keyboard paths.',
+    description: 'Long passphrase with high collision entropy, zero breach matches, and distributed keyboard paths.',
     expectedTier: 'Strong',
   },
   {
     name: 'High Harmonic Random ("kX9#vP2$mL8!zQ")',
     password: 'kX9#vP2$mL8!zQ',
     category: 'High Harmonic Random',
-    description: 'Maximal Rényi collision entropy, high Fourier flatness, and high keyboard walk turning angles.',
+    description: 'Maximal R�nyi collision entropy, high Fourier flatness, high turning angles, and absent from breach corpora.',
     expectedTier: 'Very strong',
   },
   {
